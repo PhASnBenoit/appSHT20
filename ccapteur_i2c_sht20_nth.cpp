@@ -1,51 +1,26 @@
-#include "ccapteur_i2c_sht20.h"
+#include "ccapteur_i2c_sht20_nth.h"
 
-CCapteur_I2c_SHT20::CCapteur_I2c_SHT20(QObject *parent, int noMesBase) :
-    QThread(parent)
+CCapteur_I2c_SHT20_NTh::CCapteur_I2c_SHT20_NTh(QObject *parent) :
+    QObject(parent)
 {
-    m_shm = new CSharedMemory(this);
-    connect(m_shm, SIGNAL(sigErreur(QString)), this, SLOT(onErreur(QString)));
-    m_shm->attacherSeulement();
-
     m_i2c = CI2c::getInstance(this, '1');
     connect(m_i2c, SIGNAL(sigErreur(QString)), this, SLOT(onErreur(QString)));
-    m_fin=false;
-    m_noMesBase = noMesBase;
-    qDebug() << "Objet CCapteur_I2c_SHT20 créé !";
+    qDebug() << "Objet CCapteur_I2c_SHT20_NTh créé !";
 }
 
-CCapteur_I2c_SHT20::~CCapteur_I2c_SHT20()
+CCapteur_I2c_SHT20_NTh::~CCapteur_I2c_SHT20_NTh()
 {
     CI2c::freeInstance();
-    m_shm->detach();
-    delete m_shm;
-    qDebug() << "Objet CCapteur_I2c_SHT20 détruit !";
-
+    qDebug() << "Objet CCapteur_I2c_SHT20_NTh détruit !";
 }
 
-void CCapteur_I2c_SHT20::run()
-{
-    float mesureHum, mesureTemp;
 
-     while(!m_fin) {
-         // écriture de la mesure dans le segment de mémoire partagé
-         mesureHum = lireMesureHum();
-         usleep(100000);
-         mesureTemp = lireMesureTemp();
-         m_shm->lock(); // on prend la mémoire partagée
-         m_shm->ecrire(m_noMesBase, mesureTemp);  // écriture dans la mémoire partagée
-         m_shm->ecrire(m_noMesBase+1, mesureHum);  // écriture dans la mémoire partagée
-         m_shm->unlock(); // on libère la mémmoire partagée
-         sleep(1); // lecture toutes les s
-     } // while
-}
-
-void CCapteur_I2c_SHT20::onErreur(QString mess)
+void CCapteur_I2c_SHT20_NTh::onErreur(QString mess)
 {
     emit sigErreur(mess);
 }
 
-float CCapteur_I2c_SHT20::lireMesureHum()
+float CCapteur_I2c_SHT20_NTh::lireMesureHum()
 {
     float hum;
     unsigned char lecture[3];
@@ -57,7 +32,7 @@ float CCapteur_I2c_SHT20::lireMesureHum()
     usleep(100000);
     res=m_i2c->lire(ADR, lecture, 2);
     if (res != 2) {
-        QString mess="CCapteur_I2c_SHT20::lireMesureHum ERREUR Lecture";
+        QString mess="CCapteur_I2c_SHT20_NTh::lireMesureHum ERREUR Lecture";
         emit sigErreur(mess);
         return -1;
     } // if res
@@ -68,7 +43,7 @@ float CCapteur_I2c_SHT20::lireMesureHum()
     return hum;
 } // lireMesHum
 
-float CCapteur_I2c_SHT20::lireMesureTemp()
+float CCapteur_I2c_SHT20_NTh::lireMesureTemp()
 {
     float temp;
     unsigned char lecture[2];
@@ -80,7 +55,7 @@ float CCapteur_I2c_SHT20::lireMesureTemp()
     usleep(100000);
     res=m_i2c->lire(ADR, lecture, 2);
     if (res != 2) {
-        QString mess="CCapteur_I2c_SHT20::lireMesureTemp ERREUR Lecture";
+        QString mess="CCapteur_I2c_SHT20_NTh::lireMesureTemp ERREUR Lecture";
         emit sigErreur(mess);
         return -1;
      } // if res

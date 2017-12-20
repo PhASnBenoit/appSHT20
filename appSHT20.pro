@@ -24,8 +24,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        cihmappsht20.cpp
+        cihmappsht20.cpp \
+    ../biblis/ci2c.cpp \
+    ccapteur_i2c_sht20_nth.cpp
 
-HEADERS  += cihmappsht20.h
+HEADERS  += cihmappsht20.h \
+    ../biblis/ci2c.h \
+    ccapteur_i2c_sht20_nth.h
 
 FORMS    += cihmappsht20.ui
